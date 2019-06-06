@@ -1,0 +1,18 @@
+debug = false
+
+logLevel = "ERROR"
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[retry]
+
+[api]
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "localhost.hacknlove.org"
+watch = true
+exposedByDefault = false

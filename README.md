@@ -14,4 +14,3 @@ docker-compose up -d
 cd traefik
 docker-compose up -d
 ```
-# crowdference-dev-environment

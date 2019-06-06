@@ -1,0 +1,84 @@
+version: '3.2'
+services:
+  mongo:
+    image: mongo:latest
+    volumes:
+      - ../dump:/dump
+    ports:
+      - 127.0.0.1:27017:27017
+    logging:
+      driver: none
+      # options:
+      #   max-size: "200k"
+      #   max-file: "10"
+  rest:
+    depends_on:
+      - mongo
+    build: .
+    image: hacknlove/crowdference:dev
+    env_file: ./environment.sh
+    logging:
+      # driver: none
+      driver: json-file
+      options:
+        max-size: "200k"
+        max-file: "10"
+    volumes:
+      - type: bind
+        source: ../crowdference-rest
+        target: /home/node
+    expose:
+      - 8000
+    networks:
+      - web
+      - default
+    labels:
+      - "traefik.port=8000"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:api.crowdference.org.localhost.hacknlove.org"
+      - "traefik.docker.network=web"
+    entrypoint: >
+      /bin/bash -c "
+        npm install
+        nodemon npm start
+      "
+
+
+
+  meteor:
+    depends_on:
+      - mongo
+    build: .
+    image: hacknlove/crowdference:dev
+    env_file: ./environment.sh
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+    volumes:
+      - type: bind
+        source: ../crowdference
+        target: /home/node/meteor
+    environment:
+      PORT: 3000
+    expose:
+      - 3000
+    networks:
+      - web
+      - default
+    labels:
+      - "traefik.port=3000"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:crowdference.org.localhost.hacknlove.org"
+      - "traefik.docker.network=web"
+    entrypoint: >
+      /bin/bash -c "
+        cd meteor
+        meteor npm install
+        npm start
+      "
+
+networks:
+  web:
+    external: true
